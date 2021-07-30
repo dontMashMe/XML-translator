@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import api_request as API
+import re
 
 
 class XMLParser:
@@ -24,6 +25,28 @@ class XMLParser:
         print("Inserting new language: {}".format(lang.text))
         self.write_changes()
         # print(ET.tostring(languages))
+
+    def reiterate_untranslated_vals(self):
+        literals = self.root.findall('content/literal')
+        api_interface = API.APIInterface("EN", self.dest_lang_lid)
+        counter = 0
+        for literal in literals:
+            vals = literal.findall('value')
+            for value in vals:
+                flag = True
+                if value.attrib.get('lid') == self.dest_lang_lid:
+                    if value.text is not None:
+                        for x in value.text:
+                            if re.search(u'[\u4e00-\u9fff]', x):
+                                flag = False
+                        if flag:
+                            counter += 1
+                            old_val = value.text
+                            value.text = api_interface.translate(value.text)
+                            print("Untranslated value: {} at literal: {}\nTranslated to: {}"
+                                  .format(old_val, literal.attrib.get('id'), value.text))
+                            self.write_changes()
+        print("Found {} untranslated values\n".format(counter))
 
     def insert_new_literal_tags(self):
         literals = self.root.findall('content/literal')
@@ -89,7 +112,7 @@ class XMLParser:
                 if value.attrib.get('lid') != 'en' or value.text is None:
                     value_group.remove(value)
 
-        return api_interface.translate_r(values)
+        return api_interface.translate_list(values)
 
     # xmlns attribute tag in root messes with the module in a way that it can't reliable fetch tags by name
     # removing it and adding after job is done is the easiest way of dealing with the problem

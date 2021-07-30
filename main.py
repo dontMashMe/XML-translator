@@ -12,3 +12,5 @@ xml_parser = XMLParser(xml_file, dest_lang_lid=lid)
 xml_parser.insert_new_supported_lang(lang=language)
 # step 3 translate literals and write output file
 xml_parser.insert_new_literal_tags()
+# step 4 reiterate through xml and translate skipped values
+xml_parser.reiterate_untranslated_vals()

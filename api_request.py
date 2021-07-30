@@ -18,7 +18,7 @@ class APIInterface:
         response_JSON = json.loads(response_object.text)
         return response_JSON
 
-    def translate_r(self, values: list) -> dict:
+    def translate_list(self, values: list) -> dict:
         string_to_translate = ""
         translations_dict = {}
         eng_translations = []
@@ -51,6 +51,5 @@ class APIInterface:
         params = {"q": text, "langpair": "{0}|{1}".format(self.source_lang.upper(), self.dest_lang_lid.upper()),
                   "de": "marijan.bebek@mail.com"}
         segments = self.request_from_api(params=params)
-        print(segments)
         response_data = segments.get('responseData')
         return response_data.get('translatedText')
